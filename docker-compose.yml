@@ -1,0 +1,35 @@
+name: emp-eval
+
+services:
+  db:
+    image: postgres:17.3-alpine3.21
+    container_name: pg-db
+    ports:
+      - "5431:5432"
+    environment:
+      POSTGRES_PASSWORD: qwer123
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+
+  backend:
+    container_name: django
+    build:
+      context: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db
+
+  frontend:
+    container_name: front-end
+    build: ./client
+    ports:
+      - "5173:5173"
+    environment:
+      NODE_ENV: development
+    command: npm run dev
+    restart: always
+    depends_on:
+      - backend
